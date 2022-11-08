@@ -3,7 +3,7 @@ build==0.8.0
 canalystii==0.1
 -e git+https://github.com/christiansandberg/canopen.git@62eb145920146386c3e0d024f7ddad52fdb18f97#egg=canopen
 colorama==0.4.6
--e git+https://github.com/Mazurovskyi/servo_control_scripts.git@620ca08e456604561167faacf1ad67cb640d2f6d#egg=engine
+-e git+https://github.com/Mazurovskyi/servo_control_scripts.git@bbe0d9f81ee925a9d1dd819020c07fd52d8181d6#egg=engine
 packaging==21.3
 pep517==0.13.0
 pyparsing==3.0.9
