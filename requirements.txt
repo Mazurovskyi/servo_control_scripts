@@ -1,0 +1,16 @@
+bitarray==2.6.0
+build==0.8.0
+canalystii==0.1
+-e git+https://github.com/christiansandberg/canopen.git@62eb145920146386c3e0d024f7ddad52fdb18f97#egg=canopen
+colorama==0.4.6
+-e git+https://github.com/Mazurovskyi/servo_control_scripts.git@620ca08e456604561167faacf1ad67cb640d2f6d#egg=engine
+packaging==21.3
+pep517==0.13.0
+pyparsing==3.0.9
+python-can==4.0.0
+pyusb==1.2.1
+pywin32==304
+tomli==2.0.1
+typing_extensions==4.4.0
+windows-curses==2.3.0
+wrapt==1.14.1
