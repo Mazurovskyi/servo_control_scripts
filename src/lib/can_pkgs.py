@@ -177,14 +177,14 @@ def create_crc(msg):
     #byte_array = get_bytes(bitflow,padding='0')
 
     #crc = crc_creators.modbus_16_2(byte_array)                         #creating crc-16 from modbus_16. Need to reverse high and low bytes 
-    #crc = crc_creators.modbus_16(byte_array)                       #creating crc-16 from modbus_16. Need to reverse high and low bytes 
-    #crc = crc_creators.arc_16_table(byte_array)                            #creating reverse crc-16 from modbus_16 using table. Ready to send into bus        
-    #crc = crc_creators.arc_16_poli(byte_array)                       #creating reverse crc-16 from modbus_16 using polinom. Ready to send into bus   
+    #crc = crc_creators.modbus_16(byte_array)                           #creating crc-16 from modbus_16. Need to reverse high and low bytes 
+    #crc = crc_creators.arc_16_table(byte_array)                        #creating reverse crc-16 from modbus_16 using table. Ready to send into bus        
+    #crc = crc_creators.arc_16_poli(byte_array)                         #creating reverse crc-16 from modbus_16 using polinom. Ready to send into bus   
 
-    #crc = crc_creators.ccitt_16_table(byte_array)                    #creating crc ccitt_16 using table                                 
-    #crc = crc_creators.ccitt_16_poli(byte_array)                          #creating crc ccitt_16 using polinom                             
+    #crc = crc_creators.ccitt_16_table(byte_array)                      #creating crc ccitt_16 using table                                 
+    #crc = crc_creators.ccitt_16_poli(byte_array)                       #creating crc ccitt_16 using polinom                             
 
-    #crc = crc_creators.crc_16_alter(byte_array)                      #creating crc-16 using polinom. 
+    #crc = crc_creators.crc_16_alter(byte_array)                        #creating crc-16 using polinom. 
 
 
     #----------- creating reverse crc ----------- 
