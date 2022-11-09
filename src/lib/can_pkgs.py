@@ -112,7 +112,7 @@ def reverse(val)->int:
 def create_excess(bitflow)->int:
     counter_1 = 0
     counter_0 = 0
-    str_bitflow = "{0:b}".format(bitflow)
+    str_bitflow = "{0:b}".format(bitflow)[:(bits_amount(bitflow)-1)]
     excess_amount = 0       
 
     for index,bit in enumerate("{0:b}".format(bitflow)):   
@@ -161,8 +161,8 @@ def create_crc(msg):
     print("BITFLOW FOR A CRC CALCULATION")
     show_bitflow(bitflow)
 
-    print("REVERSE BITFLOW FOR A CRC CALCULATION")
-    print(get_reverse_bytes(bitflow))
+    #print("REVERSE BITFLOW FOR A CRC CALCULATION")
+    #print(get_reverse_bytes(bitflow))
     
     #----------- creating crc ----------- 
 
@@ -173,8 +173,9 @@ def create_crc(msg):
     #crc_16bit = crc_creators.crc_remainder("{0:b}".format(bitflow), "{0:b}".format(0x8005), '0')
     #crc_16bit = int(crc_16bit, base=2)
 
-    #polinom for 15-bit crc (need crc_delim=1): 0xA5E6  
-    #crc_15bit = crc_creators.crc_remainder("{0:b}".format(bitflow), "{0:b}".format(0xA5E6), '0')
+    #polinom for 15-bit crc (need crc_delim=1): 0x4599  or 86EE
+    #crc_15bit = crc_creators.crc_remainder("{0:b}".format(bitflow), "{0:b}".format(0x4599), '0')
+    #print("CRC-15 without delim: ", crc_15bit)
     #crc_15bit = int(crc_15bit, base=2) 
     #crc_15bit = (crc_15bit << 1) | 1               # delim 
 
@@ -184,28 +185,35 @@ def create_crc(msg):
     #crc_16bit = crc_creators.modbus_16(get_bytes(bitflow))                 #creating crc from modbus_16. Need to reverse high and low bytes 
     #crc_16bit = crc_creators.modbus_16_2(get_reverse_bytes(bitflow))       #creating crc from modbus_16. Need to reverse high and low bytes 
     #crc_16bit = crc_creators.arc_16(get_reverse_bytes(bitflow))            #creating reverse crc from modbus_16 using table. Ready to send into bus        
-    crc_16bit = crc_creators.modbus_16_3(get_reverse_bytes(bitflow))        #creating reverse crc from modbus_16 using polinom. Ready to send into bus   
+    #crc_16bit = crc_creators.modbus_16_3(get_reverse_bytes(bitflow))        #creating reverse crc from modbus_16 using polinom. Ready to send into bus   
 
     
     #crc_16bit = crc_creators.ccitt_table_16(get_reverse_bytes(bitflow))     #creating crc ccitt_16 with table                                 
-    #crc_16bit = crc_creators.ccitt_16(get_bytes(bitflow,param='0'))         #creating crc ccitt_16 using polinom                             
+    #crc_16bit = crc_creators.ccitt_16(get_reverse_bytes(bitflow))         #creating crc ccitt_16 using polinom                             
                       
-    #crc_16bit = crc_creators.can_crc_next(get_bytes(bitflow,param='0'))     # crc-16 using polinom
+    #crc_16bit = crc_creators.can_crc_next(get_reverse_bytes(bitflow))     # crc-16 using polinom
+
+    crc_15bit = crc_creators.crc_calc(bitflow=bitflow, divizor=4599)
+    
+    print("bits_amount(crc_15bit): ", bits_amount(crc_15bit))
+    
+    print("CRC:    {0}          hex: {1}".format(bin(crc_15bit), hex(crc_15bit)))
+    
 
 
-    #print("CRC:    {0}          hex: {1}".format(bin(crc_16bit), hex(crc_16bit)))
+    
 
     #----------- creating reverse crc ----------- 
-    crc_16bit_rev = reverse(crc_16bit)                  
-    print("modbus CRC reverse: ", hex(crc_16bit_rev))
+    #crc_16bit_rev = reverse(crc_15bit)                  
+    #print("modbus CRC reverse: ", hex(crc_16bit_rev))
+
+
+    crc_15bit = (crc_15bit << 1) | 1
+    joint_bitflow = add_to_bitflow(crc_15bit, bitflow)              # add crc section to bitflow
 
 
 
-    joint_bitflow = add_to_bitflow(crc_16bit, bitflow)              # add crc section to bitflow
-
-
-
-    return (crc_16bit,joint_bitflow)
+    return (crc_15bit,joint_bitflow)
 
 
 class SDO:
@@ -215,7 +223,7 @@ class SDO:
                         #rtr =  0 default (dominant for data frame. only data frames)       
                         #r1  =  0 default (dominant for standart identifier. Only. standart identifiers)
                         #r0  =  0 defoult ---reserved bits must be dominant
-    ack     = 0x03      # ack = [ack | delim] = [1 | 1] defoult. 
+    ack     = 0x01      # ack = [ack | delim] = [1 | 1] defoult. 
                         # ack = 1 defoult. Transmitter sends rececive, reciever asserts dominant     MAY BE equal "0" 
                         # delim = 1 defoult. Rececive defoult
     eof     = 0x7F      # 7 bit rececive defoult. end of package. 
@@ -393,87 +401,21 @@ def eof_itm():
 
 
 def test():
-
-
-    device = usb.core.find(idVendor=0x5555, idProduct=0x5710)
-    for el in device:
-        print(el)
     
-    print('channel: ', device.product)
-    print('bus: ', device.bus)
-    print('address: ', device.address)
-    
-
-    #try: 
-    network = canopen.Network()
-
-    #node = canopen.RemoteNode(1, 'D:\My_projects\python_projects\engine\src\M series_MOTOR(2).eds')
-    #network.add_node(node)
-
-    network.connect(bustype="canalystii", channel="0", bitrate=1000000)
-
-    #network.scanner.search()
-    # We may need to wait a short while here to allow all nodes to respond
-    #time.sleep(0.05)
-    #for node_id in network.scanner.nodes:
-    #    print("Found node %d!" % node_id)
-
-    
-
-    #except Exception as err:
-    #    print(err)
-    
-
-    #device_name = node.sdo['Device Type'].raw
-    #print(device_name)
-
-    #for obj in node.object_dictionary.values():
-        #print('0x%X: %s' % (obj.index, obj.name))
-        #if isinstance(obj, canopen.objectdictionary.Record):
-            #for subobj in obj.values():
-                #print('  %d: %s' % (subobj.subindex, subobj.name))
-    
-
-
-
-
-
-    #with can.interface.Bus() as bus:
-
-    #    msg = can.Message(arbitration_id=0x601, data=[0x2F, 0x60, 0x60, 0x00, 0x01], is_extended_id=True)
-
-    #    try:
-    #        bus.send(msg)
-    #        print(f"Message sent on {bus.channel_info}")
-    #    except can.CanError:
-    #        print("Message NOT sent")
-    pass
+    polinom = "{0:b}".format(0xB1)
+    crc = crc_creators.crc_remainder('1011101101111010100101101000', polinom, '0')
+    print("CRC: ",hex(int(crc,base=2)))
 
 def test_2():
-    import usb.core
-    import usb.backend.libusb1
+    #bitflow = 0x34EC    11010011101100
+    #divizor = 0xB       1011
+    crc_creators.crc_calc(bitflow=0x34EC, divizor=0xB)
 
-    backend = usb.backend.libusb1.get_backend(find_library=lambda x: "C:\Windows\System32\libusb-1.0.dll")
-    
-    device = usb.core.find(idVendor=0x5555, idProduct=0x5710, backend=backend)
-    for el in device:
-        print(el)
 
-    #bus = can.interface.Bus(bustype='canalystii',bitrate=1000000) 
-        
-    #print('product: ', device.product)
-    #print('bus: ', device.bus)
-    #print('address: ', device.address)
-
-    #network = canopen.Network()
-    #network.connect(bustype="canalystii", channel='0', bitrate=1000000)
-    print(backend)
-    dev = canalystii.CanalystDevice(bitrate=1000000)
-    print(dev)
 
 def test_x():
-    expect_result = '1100111010011001'   #15 bit + 1 = 16-bit crc    polinom: 10000011001011111     0x1065F
-    expect_result2 = '110011101001100'   #15-bit crc                 polinom: 1010010111100110      0xA5E6
+    
+    expect_result2 = '110011101001100'   #15-bit crc                 polinom: 0x86EE
     crc = ''
     i = 0
     polinom = "{0:b}".format(i)
@@ -481,12 +423,12 @@ def test_x():
         i+=1
         print("i:", i)
         polinom = "{0:b}".format(i)
-        crc = crc_remainder('1010101010100000100', polinom, '0')
+        crc = crc_creators.crc_remainder('0101010101010000000', polinom, '0')
         print("crc: ",crc)
 
     
         
-    res = crc_check('1010101010100000100', polinom, crc)
+    res = crc_creators.crc_check('0101010101010000000', polinom, crc)
     print(res)
     print("polinom: ", polinom)
 
@@ -503,49 +445,34 @@ def show_frame(can_dataframe):
 
 if __name__ == "__main__":
 
-    #backend = usb.backend.libusb1.get_backend(find_library=lambda x: "C:\Windows\System32\libusb-1.0.dll")
-    #device = usb.core.find(idVendor=0x5555, idProduct=0x5710)
 
-    #if device is None:
-    #        raise ValueError('Device not found')
+    #100010110011001 - 4599 poli
+    #1111000001111101011111010000000000000000000000001111000011111111 input
 
-    #device.set_configuration()
-
+    initialization_start = (0x01, 0x00)	#01 h Start network node
+    initialization_oper =  (0x80, 0x00)	#02 h Stop network node
+                                        #80 h Go to “Pre-operational”
+                                        #81 h Reset node
+                                        #82 h Reset communication
 
     control_word_0F = (0x2B, 0x40, 0x60, 0x00, 0x0F, 0x00)
-    work_mode =     (0x2F, 0x60, 0x60, 0x00, 0x01)                      # work mode 1       
+    work_mode =     (0x2F, 0x60, 0x60, 0x00, 0x01)                         # work mode 1       
     actual_position = (0x40, 0x64, 0x60, 0x00)
     speed = (0x23, 0x81, 0x60, 0x00, 0xE8, 0x03, 0x00, 0x00)
     acceleration = (0x23, 0x83, 0x60, 0x00, 0x20, 0x4E, 0x00, 0x00)
     control_word_2F =  (0x2B, 0x40, 0x60, 0x00, 0x2F, 0x00)                # control word 2F      
-    location_cash = (0x23, 0x7A, 0x60, 0x00, 0xE0, 0x93, 0x04, 0x00)    # location cash 300 000 = 0493E0
-    status = (0x40, 0x41, 0x60, 0x00)
+    location_cash = (0x23, 0x7A, 0x60, 0x00, 0xE0, 0x93, 0x04, 0x00)       # location cash 300 000 = 04 93 E0
+    status = (0x40, 0x41, 0x60, 00)
 
+    dataframe = [initialization_start, initialization_oper, control_word_0F, work_mode, actual_position, speed, acceleration, control_word_2F, location_cash, status]
 
+    for data in dataframe:
 
-    package = SDO(1,data=location_cash)
-    can_dataframe = package.build_can_dataframe()
-    show_frame(can_dataframe)
+        package = SDO(1,data=data)
+        can_dataframe = package.build_can_dataframe()
+        show_frame(can_dataframe)
+        print("")
     
-    
-
-
-    #can_dataframe = bytes(can_dataframe)
-    #print("sending... ", can_dataframe)
-
-    #written_bytes = device.write(0x01, can_dataframe)								
-    #print("written_bytes: ", written_bytes)
-    #time.sleep(1)
-    #try:
-    #    returned_bytes = device.read(0x83, written_bytes)					
-    #    print("returned_bytes: ", returned_bytes)	
-    #except Exception as err:
-    #    print(err)
-        
-
-    #try:
-    #    test_x()
-    #except Exception as err:
-    #    print(err)
+    #test_2()
     
 

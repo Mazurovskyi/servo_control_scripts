@@ -1,3 +1,4 @@
+from bitarray import bitarray 
 #================================================ MODBUS-16 ================================================
 
 # Table of CRC values for high–order byte
@@ -159,7 +160,7 @@ def modbus_16_3(byte_array):
 
         for i in range(8, 0, -1):
             if ((crc & 0x0001) != 0):
-                crc >>= 1
+                crc = crc >> 1
                 crc ^= 0xA001
             else: crc >>= 1
         
@@ -221,7 +222,7 @@ def ccitt_table_16(byte_array):
 # returnes very long crc!
 def ccitt_16(byte_array):
     """ return CCITT-16 crc with polinom """
-    crc = 0xFFFF
+    crc = 0xFFFE
 
     for byte in byte_array:
         crc ^= byte << 8
@@ -229,13 +230,13 @@ def ccitt_16(byte_array):
         for i in range(0,8):
 
             if crc & 0x8000 != 0:
-                crc = (crc << 1) ^ 0x1021
+                crc = (crc << 1) ^ 0x4599 #62CC #4CD1   #4599
                 
             else:
                 crc = crc << 1
 
-            crc = crc & 0xFFFF
-            #crc = (crc << 1) ^ 0x1021 if crc & 0x8000 else crc << 1
+            crc = crc & 0xFFFE
+            #crc = (crc << 1) ^ 0x4599 if crc & 0x8000 else crc << 1
     
     return crc
 
@@ -296,6 +297,55 @@ def extend(crc, byte):
         crc = crc << 1
 
         if (crc & 0x8000):
-            crc ^= 0xC599
+            crc ^= 0x4599
         
     return crc & 0x7fff
+
+
+
+
+
+
+
+
+
+
+
+
+#================================================ CRC-15 ================================================
+bits_amount = lambda x: len(bin(x)) - 2
+
+def crc_calc(bitflow, divizor):
+
+    checkup =  bitarray(bits_amount(bitflow))
+    checkup.setall(1)
+    checkup = int(checkup.to01(),base=2) << 15
+
+    #print("checkup: ", bin(checkup))
+
+    bitflow = bitflow << 15
+    prev_bitflow_amount = bits_amount(bitflow)
+    
+    divizor = divizor << prev_bitflow_amount - bits_amount(divizor)
+    
+    while (bitflow & checkup) != 0:
+
+        #print(bin(bitflow))
+        #print(bin(divizor))
+        #print("__________________________")
+        bitflow = bitflow ^ divizor
+        #print(bin(bitflow))
+        #print("\n")
+
+
+        current_bitflow_amount = bits_amount(bitflow)
+        divizor = divizor >> (prev_bitflow_amount - current_bitflow_amount)
+        prev_bitflow_amount = current_bitflow_amount
+        
+
+    #checksum = bitflow & 0x07FFF
+    #print("bitflow_bin:           ",bin(bitflow), "hex: ",hex(bitflow))
+    #print("checksum_from_bitflow: ",bin(checksum), "hex: ",hex(checksum))
+
+    return bitflow
+    
