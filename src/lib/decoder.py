@@ -1,4 +1,4 @@
-
+# Decode read-back bytes array into file
 def decode(returned_bytes):
     bits_amount = len(returned_bytes) * 8
     high = 0

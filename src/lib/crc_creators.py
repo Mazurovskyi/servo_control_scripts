@@ -1,5 +1,5 @@
 from bitarray import bitarray 
-#================================================ MODBUS-16 ================================================
+#================================================ MODBUS-16 DOUBLE TABLE ================================================
 
 # Table of CRC values for high–order byte
 auchCRCHi = (
@@ -45,7 +45,7 @@ auchCRCLo = (
 0x40
 )
 
-def modbus_16(byte_array):
+def modbus_16_2(byte_array):
     """ return modbus-16 crc using 2 tables. Need to reverse. """
     uchCRCHi = 0xFF         # high byte of CRC initialized 
     uchCRCLo = 0xFF         # low byte of CRC initialized 
@@ -95,7 +95,7 @@ crc16Table_3 = (
         0x0182, 0xC042, 0x8043, 0x4183, 0x0041, 0xC181, 0x8180, 0x4040
 )
 
-def modbus_16_2(byte_array):
+def modbus_16(byte_array):
     """ return modbus-16 crc using one table. Need to reverse. """
     crc = 0xFFFF
 
@@ -104,7 +104,7 @@ def modbus_16_2(byte_array):
         crc = crc & 0xFFFF
     return crc
     
-#================================================ ARC-16 ================================================
+#================================================ ARC-16 TABLE ================================================
 
 Crc16Table = (
     0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241,
@@ -141,7 +141,7 @@ Crc16Table = (
     0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
 )
 
-def arc_16(byte_array):
+def arc_16_table(byte_array):
     """ return reverce modbus-16 crc using table. Ready to send """
     crc = 0xFFFF
     for byte in byte_array:
@@ -151,7 +151,7 @@ def arc_16(byte_array):
 
 # ============================================== ARC-16 POLI ==============================================
 
-def modbus_16_3(byte_array):
+def arc_16_poli(byte_array):
     """ return reverce modbus-16 crc using polinom. Ready to send """
     crc = 0xFFFF
     for byte in byte_array:
@@ -165,10 +165,6 @@ def modbus_16_3(byte_array):
             else: crc >>= 1
         
     return crc
-
-
-
-
 
 
 
@@ -209,7 +205,7 @@ Crc16Table_2 = (
     0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
 )
 
-def ccitt_table_16(byte_array):
+def ccitt_16_table(byte_array):
     """ return CCITT-16 crc with table """
     crc = 0xFFFF
 
@@ -219,8 +215,8 @@ def ccitt_table_16(byte_array):
     return crc
 
 #================================================ CRC-16 CCITT POLI ================================================
-# returnes very long crc!
-def ccitt_16(byte_array):
+
+def ccitt_16_poli(byte_array):
     """ return CCITT-16 crc with polinom """
     crc = 0xFFFE
 
@@ -242,12 +238,31 @@ def ccitt_16(byte_array):
 
 
 
+#================================================ CRC-16 ALTER ================================================
+# an alternative funktion to calculate crc-16 using polinom
+def crc_16_alter(byte_array):
+    crc = 0
+    for byte in byte_array:
+        crc = extend(crc, byte)
+
+    return crc
+
+def extend(crc, byte):
+    crc ^= (byte & 0xFFFF) << 7
+
+    for i in range(0,8):
+        crc = crc << 1
+
+        if (crc & 0x8000):
+            crc ^= 0x4599
+        
+    return crc & 0x7fff
 
 
 
-#================================================ CRC-16 STR ================================================
+#================================================ CRC STR ================================================
 
-#Creating 16-bit crc from string polinom and string data
+#Creating n-bit crc from string polinom and string data
 def crc_remainder(input_bitstring, polynomial_bitstring, initial_filler):
     """Calculate the CRC remainder of a string of bits using a chosen polynomial.
     initial_filler should be '1' or '0'.
@@ -278,50 +293,15 @@ def crc_check(input_bitstring, polynomial_bitstring, check_value):
 
 
 
-
-
-#================================================ CRC-16 alter ================================================
-def can_crc_next(byte_array):
-    crc = 0
-
-    for byte in byte_array:
-        crc = extend(crc, byte)
-
-    return crc
-
-
-def extend(crc, byte):
-    crc ^= (byte & 0xFFFF) << 7
-
-    for i in range(0,8):
-        crc = crc << 1
-
-        if (crc & 0x8000):
-            crc ^= 0x4599
-        
-    return crc & 0x7fff
-
-
-
-
-
-
-
-
-
-
-
-
-#================================================ CRC-15 ================================================
+#================================================ CRC-15 CAN ================================================
+#User-defined function to calculate crc-15 using polinom (divizor). 
 bits_amount = lambda x: len(bin(x)) - 2
 
-def crc_calc(bitflow, divizor):
+def crc_15_can(bitflow, divizor):
 
     checkup =  bitarray(bits_amount(bitflow))
     checkup.setall(1)
     checkup = int(checkup.to01(),base=2) << 15
-
-    #print("checkup: ", bin(checkup))
 
     bitflow = bitflow << 15
     prev_bitflow_amount = bits_amount(bitflow)
@@ -329,23 +309,11 @@ def crc_calc(bitflow, divizor):
     divizor = divizor << prev_bitflow_amount - bits_amount(divizor)
     
     while (bitflow & checkup) != 0:
-
-        #print(bin(bitflow))
-        #print(bin(divizor))
-        #print("__________________________")
         bitflow = bitflow ^ divizor
-        #print(bin(bitflow))
-        #print("\n")
-
 
         current_bitflow_amount = bits_amount(bitflow)
         divizor = divizor >> (prev_bitflow_amount - current_bitflow_amount)
         prev_bitflow_amount = current_bitflow_amount
         
-
-    #checksum = bitflow & 0x07FFF
-    #print("bitflow_bin:           ",bin(bitflow), "hex: ",hex(bitflow))
-    #print("checksum_from_bitflow: ",bin(checksum), "hex: ",hex(checksum))
-
     return bitflow
     

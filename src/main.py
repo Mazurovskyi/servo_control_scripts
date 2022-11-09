@@ -1,5 +1,5 @@
-from src.lib.test import SDO
-from src.lib import test
+from src.lib.can_pkgs import SDO
+from src.lib import can_pkgs
 import usb.core
 import usb.backend.libusb1
 import time
@@ -41,9 +41,8 @@ for data in dataframe:
 	package = SDO(1,data=data)
 
 	can_dataframe = package.build_can_dataframe()
-	test.show_frame(can_dataframe)
+	can_pkgs.show_frame(can_dataframe)
 		
-
 
 	#can_dataframe.reverse()
 
@@ -51,7 +50,7 @@ for data in dataframe:
 	#for byte in can_dataframe:
 	#	invert_can_dataframe.append( ~byte & 0xFF)
 
-	
+
 	can_dataframe = bytes(can_dataframe)
 
 	print("sending... ", can_dataframe)
@@ -61,12 +60,12 @@ for data in dataframe:
 	time.sleep(1)
 
 	try:
-		returned_bytes = device.read(0x83, written_bytes)					
+		returned_bytes = device.read(0x83, 15)					
 		print("returned_bytes: ", returned_bytes, "\n")	
 		returned_msg.add(returned_bytes)
 	except Exception as err:
 		print(err)
 
 
-returned_msg.save()
+returned_msg.save()		#save returned bytes into file
 usb.util.dispose_resources(device)
