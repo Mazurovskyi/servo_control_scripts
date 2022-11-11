@@ -164,8 +164,8 @@ def create_crc(msg):
     #----------- creating 15-bit crc ----------- 
 
     #polinom from CAN description:  0x4599 0xC599 0x4CD1 0x62CC
-    crc = crc_creators.crc_remainder("{0:b}".format(bitflow), "{0:b}".format(0x4599), '0')   #creating crc-15 using str-polinom
-    crc = int(crc, base=2)
+    #crc = crc_creators.crc_remainder("{0:b}".format(bitflow), "{0:b}".format(0x4599), '0')   #creating crc-15 using str-polinom
+    #crc = int(crc, base=2)
 
     #crc = crc_creators.crc_15_can(bitflow=bitflow, divizor=0x62CC)     #creating crc-15 using polinom (divizor). User-defined function
 
@@ -173,7 +173,7 @@ def create_crc(msg):
     #----------- creating 16-bit crc -----------
 
     #for creating crc-16 you need to use byte arrays. Reverse or simple:
-    #byte_array = get_reverse_bytes(bitflow)                                             
+    byte_array = get_reverse_bytes(bitflow)                                             
     #byte_array = get_bytes(bitflow,padding='0')
 
     #crc = crc_creators.modbus_16_2(byte_array)                         #creating crc-16 from modbus_16. Need to reverse high and low bytes 
@@ -182,21 +182,21 @@ def create_crc(msg):
     #crc = crc_creators.arc_16_poli(byte_array)                         #creating reverse crc-16 from modbus_16 using polinom. Ready to send into bus   
 
     #crc = crc_creators.ccitt_16_table(byte_array)                      #creating crc ccitt_16 using table                                 
-    #crc = crc_creators.ccitt_16_poli(byte_array)                       #creating crc ccitt_16 using polinom                             
+    crc = crc_creators.ccitt_16_poli(byte_array)                       #creating crc ccitt_16 using polinom                             
 
     #crc = crc_creators.crc_16_alter(byte_array)                        #creating crc-16 using polinom. 
 
 
     #----------- creating reverse crc ----------- 
 
-    #crc_rev = reverse(crc)                  
-    #print("modbus CRC reverse: ", hex(crc_rev))
+    crc_rev = reverse(crc)                  
+    print("modbus CRC reverse: ", hex(crc_rev))
 
 
     print("CRC:    {0}          hex: {1}".format(bin(crc), hex(crc)))
     print("crc bits amount: ", bits_amount(crc))
 
-    crc = (crc << 1) | 1                                                #add delimiter = '1' to 15-bit crc
+    #crc = (crc << 1) | 1                                                #add delimiter = '1' to 15-bit crc
     joint_bitflow = add_to_bitflow(crc, bitflow)                        #add crc section to bitflow
 
     return (crc,joint_bitflow)

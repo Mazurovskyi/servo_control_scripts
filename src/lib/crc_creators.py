@@ -161,7 +161,7 @@ def arc_16_poli(byte_array):
         for i in range(8, 0, -1):
             if ((crc & 0x0001) != 0):
                 crc = crc >> 1
-                crc ^= 0xA001
+                crc ^= 0xA001  
             else: crc >>= 1
         
     return crc
@@ -218,7 +218,7 @@ def ccitt_16_table(byte_array):
 
 def ccitt_16_poli(byte_array):
     """ return CCITT-16 crc with polinom """
-    crc = 0xFFFE
+    crc = 0xFFFF
 
     for byte in byte_array:
         crc ^= byte << 8
@@ -226,12 +226,12 @@ def ccitt_16_poli(byte_array):
         for i in range(0,8):
 
             if crc & 0x8000 != 0:
-                crc = (crc << 1) ^ 0x4599 #62CC #4CD1   #4599
+                crc = (crc << 1) ^ 0x1021 #0x4599 0xC599 0x4CD1 0x62CC
                 
             else:
                 crc = crc << 1
 
-            crc = crc & 0xFFFE
+            crc = crc & 0xFFFF
             #crc = (crc << 1) ^ 0x4599 if crc & 0x8000 else crc << 1
     
     return crc
