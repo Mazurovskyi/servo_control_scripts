@@ -41,8 +41,8 @@ for data in dataframe:
 	package = SDO(1,data=data)
 
 	can_dataframe = package.build_can_dataframe()
-	can_pkgs.show_frame(can_dataframe)
-		
+	#can_pkgs.show_frame(can_dataframe)
+	
 
 	#can_dataframe.reverse()
 
@@ -51,8 +51,8 @@ for data in dataframe:
 	#	invert_can_dataframe.append( ~byte & 0xFF)
 
 
-	can_dataframe = bytes(can_dataframe)
-
+	#can_dataframe = bytes(can_dataframe)
+	#str_dataframe = "{0:b}".format(can_dataframe)
 	print("sending... ", can_dataframe)
 	written_bytes = device.write(0x01, can_dataframe)								
 	print("written_bytes: ", written_bytes)
