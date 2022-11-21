@@ -16,8 +16,8 @@ if device is None:
 device.set_configuration()
 
 
-initialization_start = (0x01, 0x00)	#01 h Start network node
-initialization_oper =  (0x80, 0x00)	#02 h Stop network node
+#initialization_start = (0x01, 0x00)	#01 h Start network node
+#initialization_oper =  (0x80, 0x00)	#02 h Stop network node
                                 	#80 h Go to “Pre-operational”
 									#81 h Reset node
 									#82 h Reset communication
@@ -32,7 +32,7 @@ location_cash = (0x23, 0x7A, 0x60, 0x00, 0xE0, 0x93, 0x04, 0x00)       # locatio
 status = (0x40, 0x41, 0x60, 00)
 
 
-dataframe = [initialization_start, initialization_oper, control_word_0F, work_mode, actual_position, speed, acceleration, control_word_2F, location_cash, status]
+dataframe = [control_word_0F, work_mode, actual_position, speed, acceleration, control_word_2F, location_cash, status]
 
 returned_msg = Decode()
 
@@ -41,7 +41,7 @@ for data in dataframe:
 	package = SDO(1,data=data)
 
 	can_dataframe = package.build_can_dataframe()
-	#can_pkgs.show_frame(can_dataframe)
+	can_pkgs.show_frame(can_dataframe)
 	
 
 	#can_dataframe.reverse()
@@ -51,7 +51,7 @@ for data in dataframe:
 	#	invert_can_dataframe.append( ~byte & 0xFF)
 
 
-	#can_dataframe = bytes(can_dataframe)
+	can_dataframe = bytes(can_dataframe)
 	#str_dataframe = "{0:b}".format(can_dataframe)
 	print("sending... ", can_dataframe)
 	written_bytes = device.write(0x01, can_dataframe)								

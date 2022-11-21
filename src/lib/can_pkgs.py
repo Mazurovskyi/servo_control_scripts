@@ -162,8 +162,8 @@ def create_crc(msg):
              
     bitflow = get_bitflow(msg)              #creating a bit sequence for a crc calculation [sof,id,control,dlc,data]. 
                                            
-    print("BITFLOW FOR A CRC CALCULATION")
-    show_bitflow(bitflow)
+    #print("BITFLOW FOR A CRC CALCULATION")
+    #show_bitflow(bitflow)
 
     #print("REVERSE BITFLOW FOR A CRC CALCULATION")
     #print(get_reverse_bytes(bitflow))
@@ -252,10 +252,12 @@ class SDO:
         #extend_bitflow = end_of_pkg(extend_bitflow, self.ack, self.eof)    #adding the ack and eof bits into bitflow
         
         #print("FULL BITFLOW WITH STUFF BITS: ")
-        #show_bitflow(extend_bitflow)
+        #show_bitflow(self.bitflow)
 
-        #return get_bytes(self.bitflow,padding='rev_0')                       #creating can_dataframe with padding the last byte with '1' sequence
-        return self.bitflow
+        print("bitflow_bin:   ", "{0:b}".format(self.bitflow))
+
+        return get_reverse_bytes(self.bitflow)                       #creating can_dataframe with padding the last byte with '1' sequence
+        #return self.bitflow
 
 # add ack and eof bits into bitflow
 def end_of_pkg(bitflow,ack,eof):
@@ -346,7 +348,7 @@ if __name__ == "__main__":
         #for byte in data:
         #   invert_can_dataframe.append( ~byte & 0xFF)
 
-        #can_dataframe = bytes(invert_can_dataframe)
+        #data = bytes(data)
 
         print("sending... ", data)
         written_bytes = device.write(0x01, data)								
